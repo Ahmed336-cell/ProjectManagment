@@ -1,26 +1,27 @@
 package com.elm.projectmanagment.data.local
 
 import androidx.room.TypeConverter
-import androidx.room.TypeConverters
+import java.util.Date
 
 class Converters {
+    
     @TypeConverter
-    fun fromList(value: List<String>?): String? {
-        return value?.joinToString(separator = ",")?:""
+    fun fromStringList(value: List<String>?): String? {
+        return value?.joinToString(",")
     }
-
+    
     @TypeConverter
-    fun toList(value: String?): List<String> {
-        return value?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
+    fun toStringList(value: String?): List<String>? {
+        return value?.split(",")?.filter { it.isNotEmpty() }
     }
-
+    
     @TypeConverter
-    fun toDate(value: Long?): java.util.Date? {
-        return value?.let { java.util.Date(it) }
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
     }
-
+    
     @TypeConverter
-    fun fromDate(date: java.util.Date?): Long? {
+    fun dateToTimestamp(date: Date?): Long? {
         return date?.time
     }
 }

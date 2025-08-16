@@ -5,18 +5,11 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "attachments" , indices = [Index("taskId")],
-    foreignKeys = [
-        ForeignKey(
-            entity = Task::class,
-            parentColumns = ["id"],
-            childColumns = ["taskId"],
-            onDelete = ForeignKey.CASCADE
+@Entity(
+    tableName = "attachments",
+    indices = [Index("taskId")],
 
-        )
-    ]
-
-    )
+)
 data class Attachment(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val filePath: String,

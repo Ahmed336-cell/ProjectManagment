@@ -39,12 +39,17 @@ android {
     buildFeatures {
         compose = true
     }
+    
+    // Room schema export
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }
 
 dependencies {
-    implementation(libs.androidx.room.runtime.v272)
-    implementation(libs.androidx.room.ktx.v272)
-    ksp(libs.androidx.room.compiler.v272)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.navigation.compose)

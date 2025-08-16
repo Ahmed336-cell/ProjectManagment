@@ -3,17 +3,17 @@ package com.elm.projectmanagment.data.local.relations
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.elm.projectmanagment.data.local.entites.Project
-import com.elm.projectmanagment.data.local.entites.Task
+import com.elm.projectmanagment.data.local.entites.User
 
 
-data class Relations(
-    @Embedded val project: Project,
+data class UserWithProject (
+    @Embedded val user: User,
+
     @Relation(
         parentColumn = "id",
-        entityColumn = "projectId",
-        entity = Task::class
+        entityColumn = "userId",
+        entity = Project::class
     )
 
-    val tasks:List<Task>,
-
-    )
+    val projects: List<Project>
+)
