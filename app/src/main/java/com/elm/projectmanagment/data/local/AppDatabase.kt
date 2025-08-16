@@ -7,6 +7,7 @@ import androidx.room.TypeConverters
 import com.elm.projectmanagment.data.local.dao.ProjectDao
 import com.elm.projectmanagment.data.local.entites.Attachment
 import com.elm.projectmanagment.data.local.entites.Project
+import com.elm.projectmanagment.data.local.entites.ProjectTaskCrossRef
 import com.elm.projectmanagment.data.local.entites.Task
 import com.elm.projectmanagment.data.local.entites.User
 
@@ -15,9 +16,10 @@ import com.elm.projectmanagment.data.local.entites.User
         User::class, 
         Project::class, 
         Task::class, 
-        Attachment::class
+        Attachment::class,
+        ProjectTaskCrossRef::class
     ], 
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

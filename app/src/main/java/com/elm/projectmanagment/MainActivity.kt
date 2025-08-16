@@ -131,8 +131,7 @@ fun TaskManagementApp(repository: Repository) {
                                     if (newTaskDescription.isNotBlank()) {
                                         Log.d("MainActivity", "Creating task for project $projectId: $newTaskDescription")
                                         val newTask = Task(
-                                            description = newTaskDescription,
-                                            projectId = projectId
+                                            description = newTaskDescription
                                         )
                                         viewModel.insertTask(newTask, projectId)
                                         newTaskDescription = ""

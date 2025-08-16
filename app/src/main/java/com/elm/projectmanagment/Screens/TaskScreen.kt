@@ -88,8 +88,7 @@ fun TaskScreen(
                     if (newTaskDescription.isNotBlank()) {
                         Log.d("TaskScreen", "Creating task: $newTaskDescription")
                         val newTask = Task(
-                            description = newTaskDescription,
-                            projectId = 1
+                            description = newTaskDescription
                         )
                         viewModel.insertTask(newTask, 1)
                         newTaskDescription = ""

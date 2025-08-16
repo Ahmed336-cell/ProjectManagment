@@ -14,12 +14,13 @@ This is a Task Management app for a small team that demonstrates Room database i
 ### Entities
 1. **User** (id, name, email) - Primary key with unique index on id
 2. **Project** (id, title, ownerId) - Foreign key to User
-3. **Task** (id, description, projectId) - Foreign key to Project
+3. **Task** (id, description) - No direct project reference (uses cross-reference table)
 4. **Attachment** (id, filePath, taskId) - Foreign key to Task
+5. **ProjectTaskCrossRef** (projectId, taskId) - Cross-reference table for many-to-many relationship
 
 ### Relationships
 - **One-to-Many**: User → Project (one user can have many projects)
-- **One-to-Many**: Project → Task (one project can have many tasks)
+- **Many-to-Many**: Project ↔ Task (projects can have many tasks, tasks can belong to many projects)
 - **One-to-Many**: Task → Attachment (one task can have many attachments)
 
 ## Key Features

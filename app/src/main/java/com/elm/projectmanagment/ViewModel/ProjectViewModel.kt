@@ -7,6 +7,7 @@ import com.elm.projectmanagment.data.local.entites.Project
 import com.elm.projectmanagment.data.local.entites.Task
 import com.elm.projectmanagment.data.local.entites.Attachment
 import com.elm.projectmanagment.data.local.entites.User
+import com.elm.projectmanagment.data.local.entites.ProjectTaskCrossRef
 import com.elm.projectmanagment.data.local.relations.ProjectWithTasks
 import com.elm.projectmanagment.data.local.relations.TaskWithAttachment
 import com.elm.projectmanagment.data.repository.Repository
@@ -46,11 +47,11 @@ class ProjectViewModel(private val repository: Repository) : ViewModel() {
                 Log.d("DB_TEST", "Inserted: $project1 with ID: $projectId1")
                 Log.d("DB_TEST", "Inserted: $project2 with ID: $projectId2")
                 
-                val task1 = Task(description = "Design UI mockups", projectId = projectId1.toInt())
-                val task2 = Task(description = "Implement login feature", projectId = projectId1.toInt())
-                val task3 = Task(description = "Create database schema", projectId = projectId1.toInt())
-                val task4 = Task(description = "Design homepage layout", projectId = projectId2.toInt())
-                val task5 = Task(description = "Optimize images", projectId = projectId2.toInt())
+                val task1 = Task(description = "Design UI mockups")
+                val task2 = Task(description = "Implement login feature")
+                val task3 = Task(description = "Create database schema")
+                val task4 = Task(description = "Design homepage layout")
+                val task5 = Task(description = "Optimize images")
                 
                 val taskId1 = repository.insertTask(task1)
                 val taskId2 = repository.insertTask(task2)
@@ -63,6 +64,21 @@ class ProjectViewModel(private val repository: Repository) : ViewModel() {
                 Log.d("DB_TEST", "Inserted: $task3 with ID: $taskId3")
                 Log.d("DB_TEST", "Inserted: $task4 with ID: $taskId4")
                 Log.d("DB_TEST", "Inserted: $task5 with ID: $taskId5")
+                
+                // Create cross-references for tasks and projects
+                val crossRef1 = ProjectTaskCrossRef(projectId = projectId1.toInt(), taskId = taskId1.toInt())
+                val crossRef2 = ProjectTaskCrossRef(projectId = projectId1.toInt(), taskId = taskId2.toInt())
+                val crossRef3 = ProjectTaskCrossRef(projectId = projectId1.toInt(), taskId = taskId3.toInt())
+                val crossRef4 = ProjectTaskCrossRef(projectId = projectId2.toInt(), taskId = taskId4.toInt())
+                val crossRef5 = ProjectTaskCrossRef(projectId = projectId2.toInt(), taskId = taskId5.toInt())
+                
+                repository.insertProjectTaskCrossRef(crossRef1)
+                repository.insertProjectTaskCrossRef(crossRef2)
+                repository.insertProjectTaskCrossRef(crossRef3)
+                repository.insertProjectTaskCrossRef(crossRef4)
+                repository.insertProjectTaskCrossRef(crossRef5)
+                
+                Log.d("DB_TEST", "Created cross-references for tasks and projects")
                 
                 val attachment1 = Attachment(filePath = "/documents/mockup.pdf", taskId = taskId1.toInt())
                 val attachment2 = Attachment(filePath = "/images/login_screen.png", taskId = taskId2.toInt())
@@ -228,14 +244,18 @@ class ProjectViewModel(private val repository: Repository) : ViewModel() {
     fun insertTask(task: Task, projectId: Int? = null) {
         viewModelScope.launch {
             try {
-                Log.d("ViewModel", "Inserting task: ${task.description} for project: ${task.projectId}")
+                Log.d("ViewModel", "Inserting task: ${task.description}")
                 val taskId = repository.insertTask(task)
                 Log.d("ViewModel", "Task inserted with ID: $taskId")
                 
+                // Refresh all tasks
                 loadAllTasks()
                 
+                // If a projectId is provided, create the cross-reference and refresh the project data
                 projectId?.let { id ->
-                    Log.d("ViewModel", "Refreshing project data for project ID: $id")
+                    Log.d("ViewModel", "Creating cross-reference for project ID: $id and task ID: $taskId")
+                    val crossRef = ProjectTaskCrossRef(projectId = id, taskId = taskId.toInt())
+                    repository.insertProjectTaskCrossRef(crossRef)
                     loadProjectWithTasks(id)
                 }
                 
@@ -245,6 +265,48 @@ class ProjectViewModel(private val repository: Repository) : ViewModel() {
                 e.printStackTrace()
             }
         }
+    }
+    
+    fun addTaskToProject(taskId: Int, projectId: Int) {
+        viewModelScope.launch {
+            try {
+                Log.d("ViewModel", "Adding task $taskId to project $projectId")
+                val crossRef = ProjectTaskCrossRef(projectId = projectId, taskId = taskId)
+                repository.insertProjectTaskCrossRef(crossRef)
+                loadProjectWithTasks(projectId)
+                Log.d("ViewModel", "Task added to project successfully")
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error adding task to project: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    fun removeTaskFromProject(taskId: Int, projectId: Int) {
+        viewModelScope.launch {
+            try {
+                Log.d("ViewModel", "Removing task $taskId from project $projectId")
+                val crossRef = ProjectTaskCrossRef(projectId = projectId, taskId = taskId)
+                repository.deleteProjectTaskCrossRef(crossRef)
+                loadProjectWithTasks(projectId)
+                Log.d("ViewModel", "Task removed from project successfully")
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error removing task from project: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    fun getProjectsForTask(taskId: Int): List<Project> {
+        var projects = emptyList<Project>()
+        viewModelScope.launch {
+            try {
+                projects = repository.getProjectsForTask(taskId)
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error getting projects for task: ${e.message}")
+            }
+        }
+        return projects
     }
     
     fun insertAttachment(attachment: Attachment, taskId: Int? = null) {

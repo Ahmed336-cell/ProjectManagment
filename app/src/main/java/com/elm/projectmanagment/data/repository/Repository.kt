@@ -7,9 +7,10 @@ import com.elm.projectmanagment.data.local.entites.Project
 import com.elm.projectmanagment.data.local.entites.Task
 import com.elm.projectmanagment.data.local.entites.User
 import com.elm.projectmanagment.data.local.entites.Attachment
+import com.elm.projectmanagment.data.local.entites.ProjectTaskCrossRef
 import com.elm.projectmanagment.data.local.relations.ProjectWithTasks
-import kotlinx.coroutines.flow.Flow
 import com.elm.projectmanagment.data.local.relations.TaskWithAttachment
+import kotlinx.coroutines.flow.Flow
 
 class Repository(private val projectDao: ProjectDao) {
 
@@ -38,10 +39,20 @@ class Repository(private val projectDao: ProjectDao) {
     fun getAllProjectsFlow(): Flow<List<Project>> = projectDao.getAllProjectsFlow()
 
     suspend fun insertTask(task: Task): Long {
-        Log.d("Repository", "Repository: Inserting task: ${task.description} for project: ${task.projectId}")
+        Log.d("Repository", "Repository: Inserting task: ${task.description}")
         val taskId = projectDao.insertTask(task)
         Log.d("Repository", "Repository: Task inserted successfully with ID: $taskId")
         return taskId
+    }
+
+    suspend fun insertProjectTaskCrossRef(crossRef: ProjectTaskCrossRef) {
+        Log.d("Repository", "Repository: Inserting project-task cross-reference: projectId=${crossRef.projectId}, taskId=${crossRef.taskId}")
+        projectDao.insertProjectTaskCrossRef(crossRef)
+    }
+
+    suspend fun deleteProjectTaskCrossRef(crossRef: ProjectTaskCrossRef) {
+        Log.d("Repository", "Repository: Deleting project-task cross-reference: projectId=${crossRef.projectId}, taskId=${crossRef.taskId}")
+        projectDao.deleteProjectTaskCrossRef(crossRef)
     }
 
     suspend fun getAllTasks(): List<Task> {
@@ -53,9 +64,16 @@ class Repository(private val projectDao: ProjectDao) {
 
     suspend fun getTasksForProject(projectId: Int): List<Task> {
         Log.d("Repository", "Repository: Fetching tasks for project ID: $projectId")
-        val tasks = projectDao.getTasksForProject(projectId)
+        val tasks = projectDao.getTasksForProjectViaCrossRef(projectId)
         Log.d("Repository", "Repository: Found ${tasks.size} tasks for project")
         return tasks
+    }
+
+    suspend fun getProjectsForTask(taskId: Int): List<Project> {
+        Log.d("Repository", "Repository: Fetching projects for task ID: $taskId")
+        val projects = projectDao.getProjectsForTask(taskId)
+        Log.d("Repository", "Repository: Found ${projects.size} projects for task")
+        return projects
     }
 
     suspend fun insertAttachment(attachment: Attachment): Long {

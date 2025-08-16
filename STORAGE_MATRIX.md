@@ -9,7 +9,7 @@ This document compares three different storage solutions used in Android develop
 |------------------|------------|------------------|--------------|-------------------|----------------------|
 | **Files** | Unstructured (binary/text) | Limited by device storage | No | Easy | Store image attachments, PDF documents, or exported project reports |
 | **DataStore** | Structured (key-value pairs) | Limited by device storage | No | Medium | Store user preferences like dark mode, app settings, or user authentication tokens |
-| **Room** | Structured (relational database) | Limited by device storage | **Yes** | Hard | Store Projects, Tasks, Users, and Attachments with relationships |
+| **Room** | Structured (relational database) | Limited by device storage | **Yes** | Hard | Store Projects, Tasks, Users, and Attachments with many-to-many relationships |
 
 ## Detailed Analysis
 
@@ -29,13 +29,27 @@ This document compares three different storage solutions used in Android develop
 - **Best for**: Complex data with relationships, structured queries
 - **Pros**: Full SQL support, relationships, data validation, reactive
 - **Cons**: More complex setup, larger APK size, learning curve
-- **Use case in this app**: Core business logic - Projects, Tasks, Users, and their relationships
+- **Use case in this app**: Core business logic - Projects, Tasks, Users, and their many-to-many relationships
+
+## Database Schema Changes
+
+### Many-to-Many Relationship
+The app now uses a **many-to-many relationship** between Projects and Tasks:
+- **Before**: One-to-many (one project could have many tasks, but each task belonged to only one project)
+- **After**: Many-to-many (one project can have many tasks, and one task can belong to many projects)
+
+### Implementation Details
+- **Cross-reference table**: `ProjectTaskCrossRef` manages the many-to-many relationship
+- **Task entity**: No longer has a `projectId` field
+- **Relations**: Uses Room's `@Junction` annotation with the cross-reference table
+- **Flexibility**: Tasks can now be shared across multiple projects
+- **Note**: The `ProjectTaskCrossRef` is defined only in the entities package to avoid duplicate definitions
 
 ## Recommendations
 
 - **Use Files** when you need to store actual file content or large binary data
 - **Use DataStore** when you need to store simple configuration or user preferences
-- **Use Room** when you need to store structured data with relationships and complex queries
+- **Use Room** when you need to store structured data with complex relationships and queries
 
 ## Performance Considerations
 
@@ -52,3 +66,4 @@ When choosing between storage solutions, consider:
 2. **Performance requirements** - High performance → Files, Structured queries → Room
 3. **Data relationships** - No relationships → Files/DataStore, With relationships → Room
 4. **Backup requirements** - Easy backup → Files, Complex backup → Room
+5. **Relationship flexibility** - Simple relationships → Direct foreign keys, Complex relationships → Cross-reference tables
